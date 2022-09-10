@@ -1,13 +1,12 @@
 [package]
-name = "aide"
+name = "network"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+bytes = "1.2"
+message-io = "0.14"
 
 [dependencies.tokio]
 version = "1"
 features = ["full"]
-
-[dependencies.network]
-path = "network"
