@@ -5,8 +5,12 @@ edition = "2021"
 
 [dependencies]
 bytes = "1.2"
-message-io = "0.14"
 
 [dependencies.tokio]
 version = "1"
 features = ["full"]
+
+[dependencies.message-io]
+version = "0.14"
+default-features = false
+features = ["tcp"]
