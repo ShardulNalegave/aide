@@ -1,13 +1,15 @@
 use std::collections::HashMap;
 use std::io::Error;
-use message_io::network::{Endpoint, Transport};
+use message_io::network::{Endpoint, NetEvent, Transport};
 use message_io::node;
-use message_io::node::{NodeEvent, NodeHandler, NodeListener};
+use message_io::node::{NodeEvent, NodeHandler, NodeListener, NodeTask};
 use crate::connection::Connection;
+use crate::events::{Event};
 
+#[allow(dead_code)]
 pub struct Node {
-  name: String,
-  host_addr: String,
+  pub name: String,
+  pub host_addr: String,
   handler: NodeHandler<()>,
   listener: NodeListener<()>,
   pub connections: HashMap<Endpoint, Connection>,
@@ -18,8 +20,6 @@ impl Node {
     let (handler, listener) = node::split();
     handler.network().listen(Transport::FramedTcp, host_addr)?;
 
-    let stream = tokio_stream::iter(&[]);
-
     Ok(Self {
       handler, listener,
       name: name.to_string(),
@@ -28,11 +28,16 @@ impl Node {
     })
   }
 
-  pub fn run(mut self) {
+  pub fn run(self, mut event_handler: impl FnMut(Event) + Send + 'static) -> NodeTask {
     let listener = self.listener;
-    listener.for_each(move |event| match event {
-      NodeEvent::Network(_) => {}
+    listener.for_each_async(move |event| match event {
+      NodeEvent::Network(net_event) => match net_event {
+        NetEvent::Connected(_, _) => event_handler(Event::Connected),
+        NetEvent::Accepted(_, _) => {}
+        NetEvent::Message(_, _) => {}
+        NetEvent::Disconnected(_) => event_handler(Event::Disconnected),
+      }
       NodeEvent::Signal(_) => {}
-    });
+    })
   }
 }

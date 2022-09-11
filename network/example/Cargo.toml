@@ -1,0 +1,15 @@
+[package]
+name = "example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+lazy_static = "1.4"
+tokio-stream = "0.1"
+
+[dependencies.tokio]
+version = "1"
+features = ["full"]
+
+[dependencies.network]
+path = ".."
