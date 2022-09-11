@@ -1,5 +1,9 @@
 
+// ===== Imports =====
+use message_io::network::Endpoint;
+// ===================
+
 pub enum Event {
-  Connected,
-  Disconnected,
+  Connected(Endpoint),
+  Disconnected(Endpoint),
 }
