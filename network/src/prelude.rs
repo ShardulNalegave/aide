@@ -1,4 +1,5 @@
 
+pub use uuid;
 pub use bytes;
 pub use message_io::network::Endpoint;
 pub use crate::{

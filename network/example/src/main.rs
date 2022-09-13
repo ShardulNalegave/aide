@@ -4,6 +4,8 @@ use network::prelude::*;
 use std::io::Error;
 use std::sync::{Arc, Mutex};
 use std::collections::HashMap;
+use network::packet::Packet;
+use crate::bytes::BytesMut;
 // ===================
 
 #[tokio::main]
@@ -13,16 +15,23 @@ async fn main() -> Result<(), Error> {
   let host_addr = args[2].clone();
   let connect_to_addr = args[3].clone();
 
-  let connections: Connections = HashMap::new();
-  let (mut node, runner) = new_node("Test Node", &host_addr, Arc::new(Mutex::new(connections)))?;
+  let connections: Arc<Mutex<Connections>> = Arc::new(Mutex::new(HashMap::new()));
+  let (mut node, runner) = new_node("Test Node", &host_addr, connections)?;
 
   let _task = runner.run(move |event| match event {
     Event::Connected(endpoint) => println!("Connected: {:?}", endpoint),
     Event::Disconnected(endpoint) => println!("Disconnected: {:?}", endpoint),
+    Event::PacketReceived(_endpoint, packet) => {
+      let msg = String::from_utf8_lossy(&packet.payload).to_string();
+      println!("Message Received --> {:?}", msg);
+    },
   });
 
   if run_as == "client" {
-    let _endpoint = node.connect(&connect_to_addr)?;
+    let endpoint = node.connect(&connect_to_addr)?;
+    node.send_packet(endpoint, Packet {
+      payload: BytesMut::from("Hello, World!"),
+    });
   }
 
   Ok(())
