@@ -2,13 +2,14 @@
 // ===== Imports =====
 use std::io::Error;
 use std::sync::{Arc, Mutex};
+use bytes::BytesMut;
 use message_io::network::{Endpoint, NetEvent, Transport};
 use message_io::node;
 use message_io::node::{NodeEvent, NodeHandler, NodeListener, NodeTask};
 use uuid::Uuid;
 use crate::connection::{Connection, Connections};
 use crate::events::Event;
-use crate::packet::Packet;
+use crate::packet::{Header, Packet, PacketType};
 // ===================
 
 pub fn new_node(name: Uuid, host_addr: &str, connections: Arc<Mutex<Connections>>) -> Result<(Node, NodeRunner), Error> {
@@ -42,12 +43,32 @@ impl Node {
 
   pub fn connect(&mut self, addr: &str) -> Result<Endpoint, Error> {
     let (endpoint, _) = self.handler.network().connect(Transport::FramedTcp, addr.to_string())?;
+    self.send_packet(
+      endpoint,
+      Header {
+        from: this.name,
+        packet_type: PacketType::Greet,
+      },
+      BytesMut::new(),
+    );
     Ok(endpoint)
   }
 
-  pub fn send_packet(&mut self, endpoint: Endpoint, packet: Packet) {
+  pub(crate) fn send_packet(&mut self, endpoint: Endpoint, header: Header, payload: BytesMut) {
+    let packet = Packet { payload, header };
     let byts = packet.to_bytes();
     self.handler.network().send(endpoint, &byts);
+  }
+
+  pub fn send(&mut self, endpoint: Endpoint, payload: BytesMut) {
+    self.send_packet(
+      endpoint,
+      Header {
+        from: self.name,
+        packet_type: PacketType::Client,
+      },
+      payload,
+    );
   }
 }
 
