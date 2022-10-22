@@ -4,18 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bytes = "1.2"
-tokio-stream = "0.1"
 
 [dependencies.tokio]
 version = "1"
 features = ["full"]
 
-[dependencies.message-io]
-version = "0.14"
-default-features = false
-features = ["tcp"]
-
-[dependencies.uuid]
-version = "1"
-features = ["v4"]
+[dependencies.trellis]
+path = "../submodules/trellis"
