@@ -1,0 +1,3 @@
+[submodule "submodules/trellis"]
+	path = submodules/trellis
+	url = https://github.com/ShardulNalegave/trellis/
