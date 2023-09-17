@@ -9,7 +9,7 @@ interface TaskListProps {
 export function TaskList({ tasks } : TaskListProps) {
   return (
     <div>
-      {tasks.map(task => <Task data={task} />)}
+      {tasks.map(task => <Task key={task._id} data={task} />)}
     </div>
   );
 }
